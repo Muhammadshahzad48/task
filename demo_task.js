@@ -1,4 +1,55 @@
 froggy.ui.form.on('Demo Task', {
+	before_submit: function(frm) {
+		// froggy.msgprint('Before Submit hook triggered');
+		console.log('Before Submit hook triggered');
+	},
+	before_cancel: function(frm) {
+		// froggy.throw('Before cancel hook triggered');
+		console.log('Before Cancel hook triggered');
+	},
+	
+	before_save: function(frm) {
+        // frappe.msgprint('Before Save hook triggered');
+		console.log('Before Save hook triggered.')
+    },
+
+	validate: function(frm) {
+		if (!frm.doc.first_name) {
+		  froggy.msgprint('Please fill in the First Name field.');
+		  froggy.validated = false;
+		}
+	  },
+	customer: function(frm) {
+		var customer = frm.doc.customer;
+		if (customer) {
+		console.log('response')
+		  froggy.call({
+			method: 'dummyapp.dummy.doctype.demo_task.demo_task.customer',
+			args: {
+				customer_name: customer
+			},
+			callback: function(response) {
+			  if (response.message) {
+				var territory = response.message;
+				frm.set_value('territory', territory);
+			  }
+			}
+		  });
+		}
+		else {
+			frm.set_value('territory', '');
+		  }
+	  },
+	  after_save: function(frm) {
+        // frappe.msgprint('After Save hook triggered');
+		console.log('After Save hook triggered.')
+    },
+	
+
+	onload: function(frm){
+		frm.toggle_display('email', false);
+	},
+
 	refresh: function(frm) {
 		frm.set_query('customer', function() {
 			return {
@@ -54,6 +105,13 @@ froggy.ui.form.on('Demo Task', {
 	  },
 	  first_name: function(frm) {
 		updateFullName(frm);
+		   if (frm.doc.first_name) {
+            frm.toggle_reqd('dob', true);
+			frm.toggle_display('email', true);
+        } else {
+            frm.toggle_reqd('dob', false);
+			frm.toggle_display('email', false);
+        }
 	  },
 	  
 	  last_name: function(frm) {
